@@ -25,19 +25,20 @@ text = """
 *Área:* {0[2]}
 *Descriçao:* {0[3]}
 *Anexo:* {0[4]}
+*Frequência: * {0[5]}
 """
 
 def env_relatorio(cod, x): #envia pelo telegram o relatório
     bot = telegram.Bot(token = telegram_token)
-    if cod == 5:
+    if cod == 5: #anexo
         bot.sendMessage(chat_id=chat_id, text=text.format(lista), parse_mode=telegram.ParseMode.MARKDOWN)
         
-    if cod <= 3:
+    if cod <= 6:
         lista.append(x)
     else: 
         lista.append(x)
         bot.sendMessage(chat_id=chat_id, text=text.format(lista), parse_mode=telegram.ParseMode.MARKDOWN)
-        print(lista)
+        
 
 def write(cod, x): #cria um arquivo txt com o relatório de erro
     #aqui é verificado se é os dados estão vindo da mensagem de start ou do resto da conversa

@@ -6,7 +6,6 @@
 
 import logging
 import postman
-from envio import *
 from credentials import *
 from telegram import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
@@ -18,7 +17,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 #Definiçao dos estados de relatar problema
-RELATAR_PROBLEMA, COOP, AREA, DESCRICAO, ANEXO = range(5)
+RELATAR_PROBLEMA, COOP, AREA, DESCRICAO, ANEXO, FREQUENCIA = range(6)
 
 # Shortcut for ConversationHandler.END
 END = ConversationHandler.END
@@ -74,20 +73,31 @@ def anexo(update, context):
     user = update.message.from_user
     anexo = update.message.photo[-1].get_file()
     anexo.download('user_photo.jpg')
-    postman.env_relatorio(cod, anexo)
-    update.message.reply_text("Perfeito!")
+    reply_keyboard = [['Sempre', 'Às vezes'], ['Aleatório', 'Não se tentou'], ['Incapaz de reproduzir', 'ND']]  
+    update.message.reply_text("Ótimo! Só mais uma coisinha, com que frequência isso ocorre?", reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
     
-    #return
+    return FREQUENCIA
     
 def skip_anexo(update, context): 
     cod = 4
-    bot = telegram.Bot(token=telegram_token)
     texto = "null"
     postman.env_relatorio(cod, texto)
-    chat_id=update.message.chat_id
-    bot.sendMessage(chat_id=chat_id, text="Ótimo!")
+    reply_keyboard = [['Sempre', 'Às vezes'], ['Aleatório', 'Não se tentou'], ['Incapaz de reproduzir', 'ND']]  
+    update.message.reply_text("Ótimo! Só mais uma coisinha, com que frequência isso ocorre?", reply_markup=ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True))
     
-    #return
+    return FREQUENCIA
+    
+def freq(update, context):
+    cod = 6
+    freq = update.message.text
+    postman.env_relatorio(cod, freq)
+    #parei aqui
+
+def gravidade(update, context):
+    pass
+
+def prioridade(update, context):
+    pass
     
 def cancel(update, context):
     user = update.message.from_user
@@ -119,6 +129,9 @@ def main():
             DESCRICAO: [MessageHandler(Filters.text, descricao)],
             ANEXO: [MessageHandler(Filters.photo, anexo),
                     CommandHandler('skip', skip_anexo)],
+            FREQUENCIA: [MessageHandler(Filters.text, freq)],
+            #GRAVIDADE:
+            #PRIORIDADE:
         },
         
         fallbacks=[CommandHandler('cancel', cancel)]
